@@ -37,8 +37,9 @@ def load_model(model_config, ckpt: str = None) -> HybridFF:
         config.pop('check_point', None)
         model = HybridFF(**config)
 
+        init_ckpt = ckpt if ckpt is not None else os.path.join(model_config, 'optimal.pt')
         sd = torch.load(
-            os.path.join(model_config, 'optimal.pt'),
+            init_ckpt,
             weights_only=True,
             map_location='cpu',
         )
@@ -48,7 +49,7 @@ def load_model(model_config, ckpt: str = None) -> HybridFF:
         assert isinstance(model_config, dict)
         model = HybridFF(**model_config)
 
-    if ckpt is not None:
+    if ckpt is not None and not isinstance(model_config, str):
         sd = torch.load(ckpt, map_location='cpu', weights_only=True)
         model.load_state_dict(sd['model_state_dict'])
         # model.load_state_dict(sd['model_state_dict'], strict=False)

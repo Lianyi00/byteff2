@@ -363,13 +363,14 @@ class FFTrainer:
         train_dls, valid_dls, epoch_steps = [], [], []
         for i, config in enumerate(dataset_config):
 
-            if 'valid_root' in config:
-                # only used in finetuning
+            if 'valid_config' in config or 'valid_root' in config:
+                # explicit train/valid datasets, mainly used in finetuning
+                valid_config = config.get('valid_config', config.get('valid_root'))
                 train_dataset = IMDataset(config=config['config'],
                                           rank=self.rank,
                                           world_size=self.world_size,
                                           shard_id=config.get('shard_id', None))
-                valid_dataset = IMDataset(config=config['valid_config'],
+                valid_dataset = IMDataset(config=valid_config,
                                           rank=self.rank,
                                           world_size=self.world_size,
                                           shard_id=None)
@@ -653,9 +654,13 @@ class FFTrainer:
             if self.epoch % self.config.training['valid_interval'] == 0:
                 averaged_loss = self.valid_epoch()
                 if self.scheduler is not None:
-                    self.scheduler.step(averaged_loss)
+                    if self.scheduler.__class__.__name__ == 'ReduceLROnPlateau':
+                        self.scheduler.step(averaged_loss)
+                    else:
+                        self.scheduler.step()
                     if self.rank == 0:
-                        self.logger.info(f"current learning rate: {self.optimizer.param_groups[0]['lr']}")
+                        lrs = [pg['lr'] for pg in self.optimizer.param_groups]
+                        self.logger.info(f"current learning rates: {lrs}")
 
                 if averaged_loss > self.best_valid_loss - self.config.training['ignore_tolerance']:
                     self.early_stop_count += 1
@@ -673,7 +678,8 @@ class FFTrainer:
                     self.plot_history()
 
                 # early stop:
-                if self.config.training['early_stop_patience'] <= self.early_stop_count:
+                early_stop_patience = self.config.training.get('early_stop_patience', None)
+                if early_stop_patience is not None and early_stop_patience >= 0 and early_stop_patience <= self.early_stop_count:
                     if self.rank == 0:
                         self.logger.info(f"Early stop! Best combined loss: {self.best_valid_loss}")
                     break

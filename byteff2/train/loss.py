@@ -51,6 +51,7 @@ class LossType(Enum):
     InterEnergyDispMSE = 5
     InterEnergyElecPauliMSE = 6
     InterEnergyCTMSE = 7
+    InterEnergyElecMSE = 8
 
 
 def loss_func(preds: dict, data: Union[MonoData, ClusterData], loss_type: LossType, **kwargs):
@@ -242,6 +243,25 @@ def loss_func(preds: dict, data: Union[MonoData, ClusterData], loss_type: LossTy
         confmask, _, ljes_scale, _ = get_confmask(cluster=True)
         pe = preds['ff_parameters']['ELEC'] + preds['ff_parameters']['PAULI']
         le = data['elec_pauli_int_energy'].clone()
+
+        if 'clamp' in kwargs and 'decay' in kwargs:
+            pte, lte = get_interaction_energy()
+            boltzmann_weight = get_boltzmann_weight(pte, lte) * confmask
+        else:
+            boltzmann_weight = torch.ones_like(ljes_scale) * confmask
+
+        if kwargs.get('mix_fe_scale', False):
+            scale = (ljes_scale**2 + boltzmann_weight**2) / (ljes_scale + boltzmann_weight + 1e-6)
+            loss = calc_conf_mean((pe - le)**2 * scale, confmask)
+        else:
+            loss = calc_conf_mean((pe - le)**2 * ljes_scale * boltzmann_weight, confmask)
+        loss = torch.mean(loss)
+
+    elif loss_type is LossType.InterEnergyElecMSE:
+
+        confmask, _, ljes_scale, _ = get_confmask(cluster=True)
+        pe = preds['ff_parameters']['ELEC']
+        le = data['elec_int_energy'].clone()
 
         if 'clamp' in kwargs and 'decay' in kwargs:
             pte, lte = get_interaction_energy()

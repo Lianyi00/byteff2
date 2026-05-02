@@ -419,7 +419,7 @@ class PreExp6Pol(PreFFLayer):
         alpha = torch.clamp(alpha, min=1e-6)
 
         if self.fix_li_alpha is not None:
-            alpha = torch.where(atomic_number.unsqueeze(-1) == 10, self.fix_li_alpha, alpha)
+            alpha = torch.where(atomic_number.unsqueeze(-1) == ELEMENT_MAP[3], self.fix_li_alpha, alpha)
 
         ff_parameters['PreExp6Pol.c6'] = c6.clip(min=1e-6)
         ff_parameters['PreExp6Pol.rvdw'] = rvdw
@@ -438,7 +438,7 @@ class PreExp6Pol(PreFFLayer):
                 li_pd = self.li_damp_clip.unsqueeze(-1).expand(damping.shape)
             else:
                 li_pd = torch.clip(damping, min=self.li_damp_clip)
-            damping = torch.where(data.node_features[:, 0] == 10, li_pd, damping)
+            damping = torch.where(data.node_features[:, 0] == ELEMENT_MAP[3], li_pd, damping)
         pol_damping = torch.clip(damping, min=self.pol_damp_clip)
         ff_parameters['PreExp6Pol.pol_damping'] = pol_damping.clone()
         return ff_parameters

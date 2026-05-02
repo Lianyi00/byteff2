@@ -26,21 +26,21 @@ MAX_RING_SIZE = 8
 MAX_CONNECTIVITY = 6
 MAX_FORMAL_CHARGE = 2
 
-SUPPORTED_ELEMENTS = [1, 6, 7, 8, 9, 15, 16, 17, 35, 53, 3]  # H, C, N, O, F, P, S, Cl, Br, I, Li
+SUPPORTED_ELEMENTS = [1, 6, 7, 8, 9, 15, 16, 17, 35, 53, 3, 5]  # H, C, N, O, F, P, S, Cl, Br, I, Li, B
 Angstrom_per_Bohr = 1 / 1.88973  # Bohr to A
 
 # use He hyper parameters for Li, since He and [Li+] are isoelectronic
-V_FREE = np.array([7.9, 35.7, 27.0, 22.7, 18.6, 95.7, 77.0, 66.7, 97.0, 152.2, 89
-                  ]) * Angstrom_per_Bohr**3  # Dictionary for free atomic volume (unit: A ** 3)
+V_FREE = np.array([7.9, 35.7, 27.0, 22.7, 18.6, 95.7, 77.0, 66.7, 97.0, 152.2, 89, 40.0
+                  ]) * Angstrom_per_Bohr**3  # Dictionary for free atomic volume (unit: A ** 3); B appended at end
 V_FREE = V_FREE.tolist()
-ALPHA_FREE = np.array([4.5, 12.0, 7.4, 5.4, 3.8, 25.0, 19.6, 15.0, 20.0, 35.0, 1.38
-                      ]) * Angstrom_per_Bohr**3  # Dictionary for free atomic polarizability (unit: A ** 3)
+ALPHA_FREE = np.array([4.5, 12.0, 7.4, 5.4, 3.8, 25.0, 19.6, 15.0, 20.0, 35.0, 1.38, 21.0
+                      ]) * Angstrom_per_Bohr**3  # Dictionary for free atomic polarizability (unit: A ** 3); B appended at end
 ALPHA_FREE = ALPHA_FREE.tolist()
-C6_FREE = np.array([6.5, 46.6, 24.2, 15.6, 9.5, 185, 134, 94.6, 162, 385, 1.46
-                   ]) * Angstrom_per_Bohr**6 * 627.509474  # Dictionary for free atomic C6 (unit: kcal/mol * A ** 6)
+C6_FREE = np.array([6.5, 46.6, 24.2, 15.6, 9.5, 185, 134, 94.6, 162, 385, 1.46, 99.5
+                   ]) * Angstrom_per_Bohr**6 * 627.509474  # Dictionary for free atomic C6 (unit: kcal/mol * A ** 6); B appended at end
 C6_FREE = C6_FREE.tolist()
-RVDW_FREE = np.array([3.1, 3.59, 3.34, 3.19, 3.04, 4.01, 3.86, 3.71, 3.93, 4.17, 2.65
-                     ]) * Angstrom_per_Bohr  # Dictionary for free atomic Rvdw (unit: A)
+RVDW_FREE = np.array([3.1, 3.59, 3.34, 3.19, 3.04, 4.01, 3.86, 3.71, 3.93, 4.17, 2.65, 3.53
+                     ]) * Angstrom_per_Bohr  # Dictionary for free atomic Rvdw (unit: A); B appended at end
 RVDW_FREE = RVDW_FREE.tolist()
 
 ELEMENT_MAP = {at: i for i, at in enumerate(SUPPORTED_ELEMENTS)}

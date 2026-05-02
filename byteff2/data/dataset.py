@@ -74,6 +74,10 @@ class DatasetConfig:
         else:
             assert save_path.endswith('.yaml')
 
+        save_dir = os.path.dirname(save_path)
+        if save_dir:
+            os.makedirs(save_dir, exist_ok=True)
+
         if timestamp:
             self._config['timestamp'] = get_timestamp()
 
@@ -95,10 +99,9 @@ class IMDataset(Dataset[T]):
         super().__init__()
 
         self.config = DatasetConfig(config)
-        if isinstance(config, str):
+        self.save_dir = self.config.get('save_dir')
+        if not self.save_dir and isinstance(config, str):
             self.save_dir = os.path.dirname(config)
-        else:
-            self.save_dir = self.config.get('save_dir')
         self.rank = rank
         self.world_size = world_size
         self.shards = self.config.get('shards')

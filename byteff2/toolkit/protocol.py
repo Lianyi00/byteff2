@@ -150,7 +150,8 @@ class Protocol:
 
     def generate_ff_params(self, component_smiles: dict):
         model_dir = get_data_file_path('trained_models/optimal.pt', 'byteff2')
-        model = load_model(os.path.dirname(model_dir))
+        checkpoint = self.config.get('checkpoint', None)
+        model = load_model(os.path.dirname(model_dir), ckpt=checkpoint)
         all_nb_params = {}
 
         for mol_name, smiles in component_smiles.items():
